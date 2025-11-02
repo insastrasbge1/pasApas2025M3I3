@@ -35,9 +35,9 @@ import java.util.Optional;
  * @author francois
  */
 public class Utilisateur extends ClasseMiroir implements Serializable {
-
+    
     private static final long serialVersionUID = 1L;
-
+    
     private String surnom;
     private String pass;
     private int role;
@@ -63,6 +63,11 @@ public class Utilisateur extends ClasseMiroir implements Serializable {
     }
 
     @Override
+    public String toString() {
+        return "Utilisateur{" + "id=" + this.getId() + "surnom=" + surnom + ", role=" + role + '}';
+    }
+    
+    @Override
     public Statement saveSansId(Connection con) throws SQLException {
         PreparedStatement insert = con.prepareStatement(
                 "insert into utilisateur (surnom,pass,role) values (?,?,?)",
@@ -74,20 +79,45 @@ public class Utilisateur extends ClasseMiroir implements Serializable {
         return insert;
     }
 
+    /**
+     * suppose que le resultset contient bien une table d'utilisateurs.
+     *
+     * @param users
+     * @return
+     */
+    private static List<Utilisateur> fromResultSetToList(ResultSet users) throws SQLException {
+        List<Utilisateur> res = new ArrayList<>();
+        while (users.next()) {
+            res.add(new Utilisateur(users.getInt("id"), users.getString("surnom"),
+                    users.getString("pass"), users.getInt("role")));
+        }
+        return res;
+        
+    }
+    
     public static List<Utilisateur> tousLesUtilisateur(Connection con) throws SQLException {
         List<Utilisateur> res = new ArrayList<>();
         try (PreparedStatement pst = con.prepareStatement("select id,surnom,pass,role from utilisateur")) {
             try (ResultSet allU = pst.executeQuery()) {
-                while (allU.next()) {
-                    res.add(new Utilisateur(allU.getInt("id"), allU.getString("surnom"),
-                            allU.getString("pass"), allU.getInt("role")));
-                }
+                return fromResultSetToList(allU);
             }
         }
-        return res;
     }
-
-    public static Optional<Utilisateur> findBySurnomPass(Connection con,String surnom,String pass) throws SQLException {
+    
+    public static List<Utilisateur> utilisateursAppreciesPar(Connection con, Utilisateur u1) throws SQLException {
+        List<Utilisateur> res = new ArrayList<>();
+        try (PreparedStatement pst = con.prepareStatement(
+                "select id,surnom,pass,role \n"
+                + " from utilisateur join apprecie on apprecie.u2 = utilisateur.id \n"
+                + " where apprecie.u1 = ?")) {
+            pst.setInt(1, u1.getId());
+            try (ResultSet allU = pst.executeQuery()) {
+                return fromResultSetToList(allU);
+            }
+        }
+    }
+    
+    public static Optional<Utilisateur> findBySurnomPass(Connection con, String surnom, String pass) throws SQLException {
         try (PreparedStatement pst = con.prepareStatement(
                 "select id,role from utilisateur where surnom = ? and pass = ?")) {
             pst.setString(1, surnom);
@@ -96,11 +126,36 @@ public class Utilisateur extends ClasseMiroir implements Serializable {
             if (res.next()) {
                 int id = res.getInt(1);
                 int role = res.getInt(2);
-                return Optional.of(new Utilisateur(id,surnom, pass, role));
+                return Optional.of(new Utilisateur(id, surnom, pass, role));
             } else {
                 return Optional.empty();
             }
-
+            
+        }
+    }
+    
+    public static void changeApprecie(Connection con,Utilisateur u,List<Utilisateur> appreciesParU) throws SQLException {
+        try {
+            con.setAutoCommit(false);
+            // je supprime tous les anciens
+            try (PreparedStatement pst = con.prepareStatement("delete from apprecie where u1 = ?")) {
+                pst.setInt(1, u.getId());
+                pst.executeUpdate();
+            }
+            // je crée avec les nouveaux
+            try (PreparedStatement pst = con.prepareStatement("insert into apprecie (u1,u2) values (?,?)")) {
+                pst.setInt(1, u.getId());
+                for (var u2 : appreciesParU) {
+                    pst.setInt(2, u2.getId());
+                    pst.executeUpdate();
+                }
+            }
+            con.commit();
+        } catch (SQLException ex) {
+            con.rollback();
+            throw ex;
+        } finally {
+            con.setAutoCommit(true);
         }
     }
 
@@ -132,7 +187,7 @@ public class Utilisateur extends ClasseMiroir implements Serializable {
                 pst.setInt(1, this.getId());
                 pst.executeUpdate();
             }
-
+            
             try (PreparedStatement pst = con.prepareStatement(
                     "delete from utilisateur where id = ?")) {
                 pst.setInt(1, this.getId());
@@ -147,7 +202,7 @@ public class Utilisateur extends ClasseMiroir implements Serializable {
             con.setAutoCommit(true);
         }
     }
-
+    
     public static Utilisateur entreeConsole() {
         String nom = ConsoleFdB.entreeString("surnom de l'utilisateur : ");
         String pass = ConsoleFdB.entreeString("password : ");
@@ -195,5 +250,5 @@ public class Utilisateur extends ClasseMiroir implements Serializable {
     public void setRole(int role) {
         this.role = role;
     }
-
+    
 }

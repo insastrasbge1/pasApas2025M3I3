@@ -29,6 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  *
@@ -45,6 +46,8 @@ public class MainConsole {
             System.out.println((i++) + ") liste des utilisateurs");
             System.out.println((i++) + ") ajouter un utilisateurs");
             System.out.println((i++) + ") supprimer des utilisateurs");
+            System.out.println((i++) + ") définir les utilisateurs appréciés par un utilisateur");
+            System.out.println((i++) + ") lister les utilisateurs appréciés par un utilisateur");
             System.out.println("0) Retour");
             rep = ConsoleFdB.entreeEntier("Votre choix : ");
             try {
@@ -61,10 +64,34 @@ public class MainConsole {
                 } else if (rep == j++) {
                     List<Utilisateur> tous = Utilisateur.tousLesUtilisateur(con);
                     List<Utilisateur> selected = ListUtils.selectMultiple(
-                            "selectionnez les utilisateurs à supprimer : ", tous, 
+                            "selectionnez les utilisateurs à supprimer : ", tous,
                             u -> u.getId() + " : " + u.getSurnom());
                     for (var u : selected) {
                         u.deleteInDB(con);
+                    }
+                } else if (rep == j++) {
+                    List<Utilisateur> tous = Utilisateur.tousLesUtilisateur(con);
+                    Optional<Utilisateur> choisi = ListUtils.selectOneOrCancel("choississez un utilisateur", tous,
+                            u -> u.getId() + " : " + u.getSurnom());
+                    if (choisi.isPresent()) {
+                        Utilisateur u1 = choisi.get();
+                        List<Utilisateur> apprecie = Utilisateur.utilisateursAppreciesPar(con, u1);
+                        List<Utilisateur> appreciables = new ArrayList<>(tous);
+                        appreciables.removeAll(apprecie);
+                        List<Utilisateur> nouveauApprecie = ListUtils.selectMultiple(
+                                "indiquez les utilisateurs appréciés par " + u1.getSurnom(),
+                                apprecie, appreciables, u -> u.getSurnom());
+                        Utilisateur.changeApprecie(con, u1, nouveauApprecie);
+                    }
+
+                } else if (rep == j++) {
+                    List<Utilisateur> tous = Utilisateur.tousLesUtilisateur(con);
+                    Optional<Utilisateur> choisi = ListUtils.selectOneOrCancel("choississez un utilisateur", tous,
+                            u -> u.getId() + " : " + u.getSurnom());
+                    if (choisi.isPresent()) {
+                        List<Utilisateur> apprecie = Utilisateur.utilisateursAppreciesPar(con, choisi.get());
+                        System.out.println("Utilisateurs appréciés par " + choisi.get().getSurnom() + " :");
+                        System.out.println(ListUtils.formatList(apprecie, "", "\n", ",", u -> u.getSurnom()));
                     }
                 }
             } catch (Exception ex) {

@@ -43,7 +43,8 @@ public class LogoutEntete extends HorizontalLayout {
 
     public void doLogout() {
         SessionInfo.logout();
-        UI.getCurrent().refreshCurrentRoute(true);
+//        UI.getCurrent().refreshCurrentRoute(true);
+        UI.getCurrent().navigate(VuePrincipale.class);
     }
 
 }

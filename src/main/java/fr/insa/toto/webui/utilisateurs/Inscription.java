@@ -18,45 +18,58 @@ along with CoursBeuvron.  If not, see <http://www.gnu.org/licenses/>.
  */
 package fr.insa.toto.webui.utilisateurs;
 
-import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import fr.insa.beuvron.utils.database.ConnectionPool;
 import fr.insa.toto.model.Utilisateur;
 import fr.insa.toto.webui.MainLayout;
-import fr.insa.toto.webui.session.OnlyConnected;
+import fr.insa.toto.webui.session.OnlyAdmin;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  *
  * @author francois
  */
-@Route(value = "utilisateurs/liste",layout = MainLayout.class)
+@Route(value = "utilisateurs/inscription",layout = MainLayout.class)
 @PageTitle("Likes")
-public class ListeUtilisateurs extends VerticalLayout implements OnlyConnected {
+public class Inscription extends FormLayout{
 
-    public ListeUtilisateurs() {
-        this.add(new H2("Liste de tous les utilisateurs"));
-        Grid<Utilisateur> grid = new Grid<>();
-        grid.addColumn(Utilisateur::getSurnom).setHeader("surnom");
-        grid.addColumn(Utilisateur::getRole).setHeader("roleID");
-        grid.addColumn(u -> u.getRole() == 1 ? "admin" : "utilisateur").setHeader("role");
-        grid.addColumn(new ComponentRenderer<>(u -> {
-            return u.getRole() == 1 ? VaadinIcon.THUMBS_UP.create() : VaadinIcon.THUMBS_DOWN.create();
-        })).setHeader("admin ?");
+    private TextField surnom;
+    private PasswordField password;
+    private Button save;
+    
+    public Inscription() {
+        this.surnom = new TextField("surnom");
+        this.password = new PasswordField("password");
+        this.save = new Button("save");
+        this.save.addClickListener((t) -> {
+            this.doSave();
+        });
+
+        this.setAutoResponsive(true);
+        this.addFormRow(this.surnom,this.password);
+        this.addFormRow(this.save);
+    }
+    
+    public void doSave() {
         try (Connection con = ConnectionPool.getConnection()) {
-            grid.setItems(Utilisateur.tousLesUtilisateur(con));
+            String surnom = this.surnom.getValue();
+            String pass = this.password.getValue();
+            int role = 2;
+            Utilisateur u = new Utilisateur(surnom, pass, role);
+            u.saveInDB(con);  
+            Notification.show("utilisateur "+ surnom + " créé");
         } catch (SQLException ex) {
             Notification.show("Problème : " + ex.getLocalizedMessage());
         }
-        this.add(grid);
     }
 
 }

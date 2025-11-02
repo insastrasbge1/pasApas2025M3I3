@@ -20,8 +20,10 @@ package fr.insa.toto.webui;
 
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
+import fr.insa.toto.webui.debug.ApprecieBrut;
 import fr.insa.toto.webui.utilisateurs.CreationAdmin;
 import fr.insa.toto.webui.utilisateurs.ListeUtilisateurs;
+import fr.insa.toto.webui.utilisateurs.SelectLikes;
 
 /**
  *
@@ -33,10 +35,15 @@ public class MainMenu extends SideNav{
         SideNavItem accueil = new SideNavItem("accueil",VuePrincipale.class);
         SideNavItem utilisateurs = new SideNavItem("utilisateurs");
         SideNavItem listeUtilisateurs = new SideNavItem("liste",ListeUtilisateurs.class);
+        SideNavItem fixeApprecie = new SideNavItem("apprecie",SelectLikes.class);
         SideNavItem creationAdmin = new SideNavItem("creation(admin)",CreationAdmin.class);
         utilisateurs.addItem(listeUtilisateurs);
+        utilisateurs.addItem(fixeApprecie);
         utilisateurs.addItem(creationAdmin);
-        this.addItem(accueil,utilisateurs);
+        SideNavItem debug = new SideNavItem("debug");
+        SideNavItem apprecieBrut = new SideNavItem("apprecie brut",ApprecieBrut.class);
+        debug.addItem(apprecieBrut);
+        this.addItem(accueil,utilisateurs,debug);
     }
     
 }

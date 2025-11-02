@@ -29,6 +29,7 @@ import com.vaadin.flow.router.Route;
 import fr.insa.beuvron.utils.database.ConnectionPool;
 import fr.insa.toto.model.Utilisateur;
 import fr.insa.toto.webui.MainLayout;
+import fr.insa.toto.webui.session.OnlyAdmin;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -39,7 +40,7 @@ import java.util.List;
  */
 @Route(value = "utilisateurs/creationAdmin",layout = MainLayout.class)
 @PageTitle("Likes")
-public class CreationAdmin extends FormLayout {
+public class CreationAdmin extends FormLayout implements OnlyAdmin{
 
     private TextField surnom;
     private PasswordField password;

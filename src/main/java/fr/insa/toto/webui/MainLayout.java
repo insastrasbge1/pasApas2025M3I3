@@ -20,6 +20,9 @@ package fr.insa.toto.webui;
 
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.router.AfterNavigationEvent;
+import com.vaadin.flow.router.AfterNavigationObserver;
+import com.vaadin.flow.router.Location;
 import fr.insa.toto.webui.session.LoginEntete;
 import fr.insa.toto.webui.session.LogoutEntete;
 import fr.insa.toto.webui.session.SessionInfo;
@@ -28,17 +31,44 @@ import fr.insa.toto.webui.session.SessionInfo;
  *
  * @author francois
  */
-public class MainLayout extends AppLayout{
-    
+public class MainLayout extends AppLayout implements AfterNavigationObserver {
+
+    private LoginEntete curLogin;
+    private LogoutEntete curLogout;
+
     public MainLayout() {
         this.addToDrawer(new MainMenu());
         DrawerToggle toggle = new DrawerToggle();
         this.addToNavbar(toggle);
         if (SessionInfo.userConnected()) {
-            this.addToNavbar(new LogoutEntete());
+            this.curLogout = new LogoutEntete();
+            this.addToNavbar(this.curLogout);
         } else {
-            this.addToNavbar(new LoginEntete());
+            this.curLogin = new LoginEntete();
+            this.addToNavbar(this.curLogin);
         }
     }
-    
+
+    public void refresh() {
+        if (this.curLogin != null) {
+            this.remove(this.curLogin);
+        }
+        if (this.curLogout != null) {
+            this.remove(this.curLogout);
+        }
+        if (SessionInfo.userConnected()) {
+            this.curLogout = new LogoutEntete();
+            this.addToNavbar(this.curLogout);
+        } else {
+            this.curLogin = new LoginEntete();
+            this.addToNavbar(this.curLogin);
+        }
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent ane) {
+//        Location loc = ane.getLocation();
+        this.refresh();
+    }
+
 }

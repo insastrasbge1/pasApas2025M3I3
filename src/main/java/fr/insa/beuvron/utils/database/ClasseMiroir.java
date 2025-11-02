@@ -160,7 +160,7 @@ public abstract class ClasseMiroir implements Serializable {
         if (this.id != -1) {
             return this.id;
         } else {
-            throw new EntiteNonSauvegardee();
+            return super.hashCode();
         }
     }
 
@@ -173,12 +173,9 @@ public abstract class ClasseMiroir implements Serializable {
         } else if (getClass() != obj.getClass()) {
             return false;
         } else if (this.id == -1) {
-            throw new EntiteNonSauvegardee();
-        }
-        ClasseMiroir other = (ClasseMiroir) obj;
-        if (other.id != -1) {
-            throw new EntiteNonSauvegardee();
+            return false;
         } else {
+            ClasseMiroir other = (ClasseMiroir) obj;
             return this.id == other.id;
         }
     }
