@@ -26,6 +26,7 @@ import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import fr.insa.beuvron.utils.database.ConnectionPool;
 import fr.insa.toto.model.Utilisateur;
+import fr.insa.toto.webui.styles.BoutonImportant;
 import fr.insa.toto.webui.utilisateurs.Inscription;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -39,13 +40,13 @@ public class LoginEntete extends HorizontalLayout {
 
     public TextField surnom;
     public PasswordField pass;
-    public Button login;
+    public BoutonImportant login;
     public Button inscription;
 
     public LoginEntete() {
         this.surnom = new TextField("surnom : ");
         this.pass = new PasswordField("pass : ");
-        this.login = new Button("se connecter");
+        this.login = new BoutonImportant("se connecter");
         this.login.addClickListener((t) -> {
             this.doLogin();
         });

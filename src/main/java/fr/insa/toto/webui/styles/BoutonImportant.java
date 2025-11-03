@@ -21,14 +21,24 @@ package fr.insa.toto.webui.styles;
 import com.vaadin.flow.component.button.Button;
 
 /**
- *
+ * Essai sur les styles CSS.
+ * <p>
+ * deux possibilités :
+ * <ul>
+ *   <li> fixer directement sur un composant avec getStyle + set</li>
+ *   <li> utiliser le fichier de style CSS : dans ce cas, le plus simple est
+ *        d'associer une classe CSS au composant
+ *   </li> 
+ * </ul>
+ * </p>
  * @author francois
  */
 public class BoutonImportant extends Button{
     
-    public BoutonImportant() {
+    public BoutonImportant(String message) {
+        super(message);
+        this.setClassName("boutonImportant");
         this.getStyle().set("font-size", "1.5em");
-        this.getStyle().set("font-weight", "bold");
     }
     
 }
