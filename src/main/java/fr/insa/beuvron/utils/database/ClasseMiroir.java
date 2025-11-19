@@ -155,29 +155,9 @@ public abstract class ClasseMiroir implements Serializable {
         return id;
     }
 
-    @Override
-    public int hashCode() {
-        if (this.id != -1) {
-            return this.id;
-        } else {
-            return super.hashCode();
-        }
+    public void setId(int id) {
+        this.id = id;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        } else if (obj == null) {
-            return false;
-        } else if (getClass() != obj.getClass()) {
-            return false;
-        } else if (this.id == -1) {
-            return false;
-        } else {
-            ClasseMiroir other = (ClasseMiroir) obj;
-            return this.id == other.id;
-        }
-    }
 
 }
